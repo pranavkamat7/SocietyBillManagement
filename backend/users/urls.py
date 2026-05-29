@@ -15,8 +15,10 @@ urlpatterns = [
     path('members/search/<int:member_id>/', search_member_by_id),
     path('transactions/create/', create_transaction),
     path('members/info/', search_members_by_name_or_email),
-
-
+    path('dashboard/stats/', get_dashboard_stats),
+    path('members/all/', get_all_members),
+    path('members/update/<int:member_id>/', update_member),
+    path('members/delete/<int:member_id>/', delete_member),
 ]
 
 # Include router-generated routes

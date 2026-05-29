@@ -19,10 +19,10 @@ export default function MyTextField(props) {
           <TextField 
           id="outlined-basic" 
           onChange = {onChange}
-          value = {value}
+          value = {value || ''}
           label= {label}
           variant="outlined" 
-          className={"myForm"}
+          fullWidth
           error = {!!error}
           helperText = {error?.message}
            />

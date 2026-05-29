@@ -29,7 +29,7 @@ export default function MyPassField(props) {
             formState,
         }) =>(
 
-          <FormControl variant="outlined" className={"myForm"}>
+          <FormControl variant="outlined" fullWidth>
           <InputLabel htmlFor="outlined-adornment-password">{label}</InputLabel>
           <OutlinedInput
             id="outlined-adornment-password"

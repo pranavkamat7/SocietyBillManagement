@@ -1,142 +1,124 @@
-import AxiosInstance from './AxiosInstance';
 import { React, useEffect, useState } from 'react';
-import { Box, TextField, Button, Typography, Paper, FormControl, FormLabel, RadioGroup, FormControlLabel, Radio } from '@mui/material';
+import AxiosInstance from './AxiosInstance';
+import { Box, Typography, Grid, Paper, Button, Card, CardContent, Avatar } from '@mui/material';
+import GroupIcon from '@mui/icons-material/Group';
+import ReceiptIcon from '@mui/icons-material/Receipt';
+import AttachMoneyIcon from '@mui/icons-material/AttachMoney';
+import PersonAddIcon from '@mui/icons-material/PersonAdd';
+import SearchIcon from '@mui/icons-material/Search';
+import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
+import { useTheme } from '@mui/material/styles';
 
 const Home = () => {
-    const [myData, setMyData] = useState();
-    const [loading, setLoading] = useState(true);
-    const [nextId, setNextId] = useState(null);
-    const [formData, setFormData] = useState({ name: '', email: '', phone: '', address: '', gender: '', amount: '', stay_from: '', stay_to: '' });
+    const [stats, setStats] = useState({ total_members: 0, total_transactions: 0, total_revenue: 0 });
+    const navigate = useNavigate();
+    const theme = useTheme();
 
     useEffect(() => {
-        AxiosInstance.get('members/latest-id/')
-            .then((res) => setNextId(res.data.next_id))
-            .catch((err) => console.error('Failed to fetch latest ID:', err));
-    }, []);
-
-    const handleChange = (e) => {
-        setFormData({ ...formData, [e.target.name]: e.target.value });
-    };
-
-    const handleSubmit = (e) => {
-        e.preventDefault();
-        const createdAt = new Date().toISOString();
-        AxiosInstance.post('members/create/', {
-            ...formData,
-            member_id: nextId,
-            created_at: createdAt,
-        })
-            .then(() => {
-                alert('Member added successfully');
-                setFormData({ name: '', email: '', phone: '', address: '', gender: '' });
-                AxiosInstance.get('members/latest-id/')
-                    .then((res) => setNextId(res.data.next_id));
+        AxiosInstance.get('dashboard/stats/')
+            .then((res) => {
+                setStats(res.data);
             })
             .catch((err) => {
-                console.error('Error saving member:', err);
-                alert('Failed to add member');
+                console.error('Failed to fetch stats:', err);
             });
-    };
+    }, []);
+
+    const statCards = [
+        { title: 'Total Members', value: stats.total_members, icon: <GroupIcon fontSize="large" />, color: '#6366f1' },
+        { title: 'Total Revenue', value: `₹${stats.total_revenue}`, icon: <AttachMoneyIcon fontSize="large" />, color: '#10b981' },
+        { title: 'Total Transactions', value: stats.total_transactions, icon: <ReceiptIcon fontSize="large" />, color: '#f59e0b' },
+    ];
 
     return (
-        <Box sx={{ maxWidth: 500, margin: 'auto', mt: 5 ,mb:5}}>
-            <Paper sx={{ p: 4, boxShadow: 6 }}>
-                <Typography variant="h6" gutterBottom>
-                    Add New Member
+        <Box sx={{ p: 1 }}>
+            <Box sx={{ mb: 4 }}>
+                <Typography variant="h4" fontWeight="bold" gutterBottom>
+                    Welcome Back, Admin 👋
                 </Typography>
-                <Typography variant="body2" sx={{ mb: 2 }}>
-                    Latest ID: {nextId ?? 'Loading...'}
+                <Typography variant="body1" color="text.secondary">
+                    Here's what's happening in your society today.
                 </Typography>
-                <form onSubmit={handleSubmit}>
-                    <TextField
-                        fullWidth
-                        name="name"
-                        label="Name"
-                        value={formData.name}
-                        onChange={handleChange}
-                        required
-                        sx={{ mb: 2 }}
-                    />
-                    <TextField
-                        fullWidth
-                        name="email"
-                        label="Email"
-                        value={formData.email}
-                        onChange={handleChange}
-                        sx={{ mb: 2 }}
-                    />
-                    <TextField
-                        fullWidth
-                        name="phone"
-                        label="Phone"
-                        value={formData.phone}
-                        onChange={handleChange}
-                        sx={{ mb: 2 }}
-                    />
-                    <TextField
-                        fullWidth
-                        name="address"
-                        label="Address"
-                        value={formData.address}
-                        onChange={handleChange}
-                        sx={{ mb: 2 }}
-                    />
+            </Box>
 
-                    {/* Gender as Radio Buttons */}
-                    <FormControl component="fieldset" sx={{ mb: 2 }}>
-                        <FormLabel component="legend">Gender</FormLabel>
-                        <RadioGroup
-                            name="gender"
-                            value={formData.gender}
-                            onChange={handleChange}
-                            row
-                        >
-                            <FormControlLabel value="male" control={<Radio />} label="Male" />
-                            <FormControlLabel value="female" control={<Radio />} label="Female" />
-                            <FormControlLabel value="other" control={<Radio />} label="Other" />
-                        </RadioGroup>
-                    </FormControl>
+            <Grid container spacing={3} sx={{ mb: 6 }}>
+                {statCards.map((card, idx) => (
+                    <Grid item xs={12} sm={4} key={idx}>
+                        <Card elevation={0} sx={{ borderRadius: 4, bgcolor: 'background.paper', border: '1px solid', borderColor: 'divider' }}>
+                            <CardContent sx={{ display: 'flex', alignItems: 'center', p: 3 }}>
+                                <Avatar sx={{ bgcolor: card.color, width: 56, height: 56, mr: 3 }}>
+                                    {card.icon}
+                                </Avatar>
+                                <Box>
+                                    <Typography variant="subtitle1" color="text.secondary">
+                                        {card.title}
+                                    </Typography>
+                                    <Typography variant="h4" fontWeight="bold">
+                                        {card.value}
+                                    </Typography>
+                                </Box>
+                            </CardContent>
+                        </Card>
+                    </Grid>
+                ))}
+            </Grid>
 
-                    <TextField
-                        fullWidth
-                        name="amount"
-                        label="Amount"
-                        type="number"
-                        value={formData.amount}
-                        onChange={handleChange}
-                        sx={{ mb: 2 }}
-                    />
+            <Typography variant="h6" fontWeight="bold" sx={{ mb: 3 }}>
+                Quick Actions
+            </Typography>
+            
+            <Grid container spacing={3}>
+                <Grid item xs={12} sm={6}>
+                    <Paper 
+                        elevation={0}
+                        sx={{ 
+                            p: 4, 
+                            borderRadius: 4, 
+                            textAlign: 'center',
+                            border: '1px dashed',
+                            borderColor: 'primary.main',
+                            bgcolor: theme.palette.mode === 'dark' ? 'rgba(99, 102, 241, 0.1)' : '#eff6ff',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 }
+                        }}
+                        onClick={() => navigate('/add-member')}
+                    >
+                        <PersonAddIcon sx={{ fontSize: 60, color: 'primary.main', mb: 2 }} />
+                        <Typography variant="h6" fontWeight="bold">Register New Member</Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 3 }}>
+                            Add a new resident or member to the society database.
+                        </Typography>
+                        <Button variant="contained" color="primary">Add Member</Button>
+                    </Paper>
+                </Grid>
 
-                    <TextField
-                        fullWidth
-                        name="stay_from"
-                        label="Stay From"
-                        type="date"
-                        value={formData.stay_from}
-                        onChange={handleChange}
-                        InputLabelProps={{ shrink: true }}
-                        sx={{ mb: 2 }}
-                    />
-
-                    <TextField
-                        fullWidth
-                        name="stay_to"
-                        label="Stay To"
-                        type="date"
-                        value={formData.stay_to}
-                        onChange={handleChange}
-                        InputLabelProps={{ shrink: true }}
-                        sx={{ mb: 2 }}
-                    />
-
-                    {/* Centering the Button */}
-                    <Box sx={{ display: 'flex', justifyContent: 'center', mt: 3 }}>
-                        <Button type="submit" variant="contained" color="primary">
-                            Save Member
-                        </Button>
-                    </Box>
-                </form>
-            </Paper>
+                <Grid item xs={12} sm={6}>
+                    <Paper 
+                        elevation={0}
+                        sx={{ 
+                            p: 4, 
+                            borderRadius: 4, 
+                            textAlign: 'center',
+                            border: '1px dashed',
+                            borderColor: 'secondary.main',
+                            bgcolor: theme.palette.mode === 'dark' ? 'rgba(236, 72, 153, 0.1)' : '#fdf2f8',
+                            cursor: 'pointer',
+                            transition: 'all 0.3s ease',
+                            '&:hover': { transform: 'translateY(-4px)', boxShadow: 4 }
+                        }}
+                        onClick={() => navigate('/transaction/search')}
+                    >
+                        <SearchIcon sx={{ fontSize: 60, color: 'secondary.main', mb: 2 }} />
+                        <Typography variant="h6" fontWeight="bold">Search Bills & Transactions</Typography>
+                        <Typography variant="body2" color="text.secondary" sx={{ mt: 1, mb: 3 }}>
+                            Look up existing members to add transactions or print receipts.
+                        </Typography>
+                        <Button variant="contained" color="secondary">Search Now</Button>
+                    </Paper>
+                </Grid>
+            </Grid>
         </Box>
     );
 };

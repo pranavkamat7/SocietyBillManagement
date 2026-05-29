@@ -119,3 +119,44 @@ def search_members_by_name_or_email(request):
     )
     serializer = MemberSerializer(members, many=True)
     return Response(serializer.data)
+
+
+@api_view(['GET'])
+def get_dashboard_stats(request):
+    from django.db.models import Sum
+    total_members = Member.objects.count()
+    total_transactions = Transaction.objects.count()
+    total_revenue = Transaction.objects.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
+    return Response({
+        "total_members": total_members,
+        "total_transactions": total_transactions,
+        "total_revenue": total_revenue
+    })
+
+@api_view(['GET'])
+def get_all_members(request):
+    members = Member.objects.all().order_by('-created_at')
+    serializer = MemberSerializer(members, many=True)
+    return Response(serializer.data)
+
+@api_view(['PUT'])
+def update_member(request, member_id):
+    try:
+        member = Member.objects.get(member_id=member_id)
+    except Member.DoesNotExist:
+        return Response({"error": "Member not found"}, status=404)
+    
+    serializer = MemberSerializer(member, data=request.data, partial=True)
+    if serializer.is_valid():
+        serializer.save()
+        return Response(serializer.data)
+    return Response(serializer.errors, status=400)
+
+@api_view(['DELETE'])
+def delete_member(request, member_id):
+    try:
+        member = Member.objects.get(member_id=member_id)
+        member.delete()
+        return Response({"message": "Member deleted successfully"}, status=204)
+    except Member.DoesNotExist:
+        return Response({"error": "Member not found"}, status=404)

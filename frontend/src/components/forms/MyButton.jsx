@@ -4,7 +4,7 @@ import Button from '@mui/material/Button';
 export default function MyButton(props) {
   const {label,type} = props
   return (
-      <Button type={type} variant="contained" className={"myButton"}>
+      <Button type={type} variant="contained" fullWidth size="large">
             {label}
       </Button>
 
